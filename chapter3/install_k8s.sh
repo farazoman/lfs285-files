@@ -27,7 +27,7 @@ EOF
 # validate changes have been updated based on above
 sysctl --system | grep -E "(table|forward)"
 
-# ?
+# Add docker to repository
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
 echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
@@ -52,7 +52,13 @@ curl -s \
 
 # update based on the new repo added
 apt-get update
+# Install k8s tools onto server
 apt-get install -y kubeadm=1.25.1-00 kubelet=1.25.1-00 kubectl=1.25.1-00
+
+# curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.26/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+# echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.26/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+# apt-get update
+# apt-get install -y kubeadm=1.26.1-00 kubelet=1.26.1-00 kubectl=1.26.1-00 
 apt-mark hold kubelet kubeadm kubectl
 
 # download calico CNI (networking) file 
@@ -136,6 +142,7 @@ systemctl status containerd # make sure its running
 
 # Install Kubernetes
 echo "deb  http://apt.kubernetes.io/  kubernetes-xenial  main" >>/etc/apt/sources.list.d/kubernetes.list
+apt-get update
 #vim /etc/apt/sources.list.d/kubernetes.list  # this can probably use append, double check
 # deb  http://apt.kubernetes.io/  kubernetes-xenial  main
 
@@ -144,6 +151,7 @@ curl -s \
        | apt-key add -
 
 # update based on the new repo added
+# apt-get install -y kubeadm=1.26.1-00 kubelet=1.26.1-00 kubectl=1.26.1-00 
 
 apt-get update && apt-get install -y kubeadm=1.25.1-00 kubelet=1.25.1-00 kubectl=1.25.1-00
 apt-mark hold kubeadm kubelet kubectl
@@ -158,13 +166,12 @@ openssl x509 -pubkey \
  -sha256 -hex | sed 's/^.* //'
 
 # WORKER NODE
-vim /etc/hosts
 # add ip of CP to here with the name of the CP server
+vim /etc/hosts
 
-kubeadm join ubu-20-cp:6443\
-    --token kedd9m.cw03ga67sqz5in1g\
-    --discovery-token-ca-cert-hash sha256:12d9bf7061ad9605bf81cc4706d479148402af7afb8995de6d5894b31309f9c3
-
+kubeadm join ubu-cp4:6443 --token t98i8q.utch1w69tr2qsetu \
+ --discovery-token-ca-cert-hash sha256:9fc5da988172c51a69894ec8c7fd2294e8bceba80cd09db577fac71a23b1b1cc 
+ # --control-plane --certificate-key a9616a846ee7b46350f50e02f48bba965a23b110ce9958189fe5bb905bf01325 # add a cp node
 
 # 3.3 Finish Cluster Setup
 # CONTROL PLANE

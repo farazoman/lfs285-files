@@ -17,8 +17,8 @@ sudo exportfs -ra # reload exports
 # ON WORKER NODE
 # Install NFS Common & Mount Shared Vol
 sudo apt-get -y install nfs-common
-showmount -e ubu-20-cp
-sudo mount ubu-20-cp:/opt/sfw /mnt
+showmount -e ubu-cp4
+sudo mount ubu-cp4:/opt/sfw /mnt
 ls -l /mnt/
 
 
@@ -36,7 +36,7 @@ spec:
     persistentVolumeReclaimPolicy: Retain # Delete, Recycle are other options - delete will delete the api object + the storage. Recycle cleans storage and keeps the api object - to be deprecated with intro of dynamic provisioning
     nfs:
         path: /opt/sfw
-        server: ubu-20-cp
+        server: ubu-cp4
         readOnly: false
 EOF
 kubectl apply -f PVol.yaml
@@ -58,7 +58,7 @@ spec:
         - ReadWriteMany
     resources:
         requests:
-            storage: 100Mi
+            storage: 200Mi
 EOF
 kubectl apply -f pvc.yaml
 
